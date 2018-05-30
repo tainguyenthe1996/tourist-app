@@ -1,5 +1,9 @@
 package edu.eiu.tourist_app;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,18 +17,29 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter recycleAdapter;
+    private PlacesViewModel placesViewModel;
 
-    private List<String> touristSites = Arrays.asList("Statue","Scenic Overlook","Art Museum",
-            "Market","Museum of Natural History","Temple","Amusement Park","City Hall","Big Bridge");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Setup RecyclerView Setup
         recyclerView = findViewById(R.id.recyclerView);
-        recycleAdapter = new TouristRecyclerAdapter(touristSites);
-        recyclerView.setAdapter(recycleAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        //Handle Places ViewModel
+        placesViewModel = ViewModelProviders.of(this).get(PlacesViewModel.class);
+        LiveData<List<WikipediaPage>> placesData = placesViewModel.getTouristSites();
+        placesData.observe(this, new Observer<List<WikipediaPage>>() {
+            @Override
+            public void onChanged(@Nullable List<WikipediaPage> touristSites) {
+                recycleAdapter = new TouristRecyclerAdapter(touristSites);
+                recyclerView.setAdapter(recycleAdapter);
+            }
+        });
+
+
     }
 }
